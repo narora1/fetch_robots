@@ -1,0 +1,21 @@
+arm_controller:
+  follow_joint_trajectory:
+    type: "robot_controllers/FollowJointTrajectoryController"
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - upperarm_roll_joint
+      - elbow_flex_joint
+      - forearm_roll_joint
+      - wrist_flex_joint
+      - wrist_roll_joint
+  gravity_compensation:
+    type: "robot_controllers/GravityCompensation"
+    root: "stand_alone_base_link"
+    tip: "gripper_link"
+    autostart: true
+
+robot_driver:
+  default_controllers:
+    - "arm_controller/follow_joint_trajectory"
+    - "arm_controller/gravity_compensation"

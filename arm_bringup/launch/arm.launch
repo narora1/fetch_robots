@@ -1,0 +1,47 @@
+<launch>
+
+  <!-- GDB Debug Option -->
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch_prefix" value="" />
+  <arg     if="$(arg debug)" name="launch_prefix"
+     value="gdb -x $(find arm_bringup)/launch/gdb_settings.gdb --ex run --args" />
+
+
+  <!-- Calibration -->
+  <param name="calibration_date" value="uncalibrated" />
+  <param name="base_controller/track_width" value="0.37476" />
+  <param name="camera/driver/z_offset_mm" value="0.0" />
+  <param name="camera/driver/z_scaling" value="1.0" />
+  <arg name="rgb_camera_info_url" default="" />
+  <arg name="depth_camera_info_url" default="" />
+
+  <!-- URDF -->
+  <param name="robot_description" textfile="$(find fetch_description)/robots/stand_alone_arm.urdf" />
+
+  <!-- Drivers for Base -->
+  <node name="robot_driver" launch-prefix="$(arg launch_prefix)" pkg="fetch_drivers" type="robot_driver" output="screen">
+    <param name="has_base" value="false" />
+    <param name="has_torso" value="false" />
+    <param name="has_head" value="false" />
+    <param name="has_arm" value="true" />
+  </node>
+
+  <!-- Drivers for Gripper -->
+  <node name="gripper_driver" pkg="fetch_drivers" type="gripper_driver" output="screen" >
+    <param name="firmware_tar_gz" value="$(find fetch_drivers)/firmware.tar.gz" />
+  </node>
+
+  <!-- Head Camera -->
+  <include file="$(find arm_bringup)/launch/include/camera.launch.xml" >
+    <arg name="rgb_camera_info_url" value="$(arg rgb_camera_info_url)" />
+    <arg name="depth_camera_info_url" value="$(arg depth_camera_info_url)" />
+  </include>
+
+  <!-- Controllers -->
+  <rosparam file="$(find arm_bringup)/config/default_controllers.yaml" command="load" />
+
+  <!-- Joint State -> TF -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher" />
+
+
+</launch>
